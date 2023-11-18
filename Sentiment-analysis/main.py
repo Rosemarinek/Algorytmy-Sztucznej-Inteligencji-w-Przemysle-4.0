@@ -7,6 +7,21 @@ import numpy as np
 from NaiveBayesFromSklearn import *
 import dill as pickle
 
+def train_nb_from_sklearn(train_data, train_labels, test_data, test_labels):
+    nbS = NaiveBayesFromSklearn(train_data, train_labels, test_data, test_labels)
+    print("----Training with an algorithm from Sklearn in progress---")
+    st = time.time()
+    nbS.train()
+    et = time.time()
+    nbS.training_duration = et - st
+    print("Training NBSklearn duration: ", nbS.training_duration)
+    print('---Training Completed---\n')
+
+    fS = open('nbSklearn_classifier.pickle', 'wb')
+    pickle.dump(nbS, fS)
+    fS.close()
+
+
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
     # ------------------------- Upload data -----------------------------#
