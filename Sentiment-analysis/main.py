@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import Preprocessing
 from sklearn import model_selection
 import numpy as np
+from NaiveBayesFromSklearn import *
+import dill as pickle
 
 if __name__ == '__main__':
     warnings.filterwarnings("ignore")
@@ -107,3 +109,69 @@ if __name__ == '__main__':
         i = i + 1
     plt.savefig("images/3.png")
     plt.show()
+
+    # # --------------------------------------------------------------------#
+    #
+    # # -----------------------------TRAINING------------------------------#
+
+    # Training NB from Sklearn
+    train_nb_from_sklearn(train_data, train_labels, test_data, test_labels)
+
+    # # --------------------------------------------------------------------#
+    #
+    # # ---------------------------OPEN MODELS------------------------------#
+    fS = open('nbSklearn_classifier.pickle', 'rb')
+    nbS = pickle.load(fS)
+    fS.close()
+
+    # # --------------------------------------------------------------------#
+    #
+    # # ----------------CALCULATING AND PLOT ACCURRACY -----------------------#
+    print("----------------Calculating accurracy-----------------------")
+    nbS_accuracy = nbS.calculating_accuracy()
+
+    plt.figure(5)
+    fig2, ax2 = plt.subplots()
+    plt.grid(color='#CCCCCC', linestyle=':', linewidth=1)
+    height = [nbS_accuracy * 100]
+    y_pos = np.arange(len(height))
+    bars = ["Algorytm z biblioteki Sklearn"]
+    plt.bar(y_pos, height, color=['cornflowerblue'])
+    plt.xticks(y_pos, bars)
+    plt.yticks(np.arange(0, 110, 10))
+    plt.xlabel("Rodzaj algorytmu", fontsize=10)
+    plt.ylabel("Dokładność [%]", fontsize=10)
+    rects = ax2.patches
+    for rect, height in zip(rects, height):
+        height_ann = rect.get_height()
+        ax2.text(
+            rect.get_x() + rect.get_width() / 2, height_ann, height, ha="center", va="bottom"
+        )
+    plt.savefig("images/accuracy.png")
+    plt.show()
+
+    # # --------------------------------------------------------------------#
+    #
+    # # ---------------------PLOT TRAINING DURATION-------------------------#
+
+    plt.figure(6)
+    fig2, ax2 = plt.subplots()
+    plt.grid(color='#CCCCCC', linestyle=':', linewidth=1)
+    height = [nbS.training_duration]
+    y_pos = np.arange(len(height))
+    bars = ["Algorytm z biblioteki \n Sklearn"]
+    plt.bar(y_pos, height, color=['dodgerblue'])
+    plt.xticks(y_pos, bars)
+    plt.xlabel("Rodzaj algorytmu", fontsize=10)
+    plt.ylabel("Czas [s]", fontsize=10)
+    rects = ax2.patches
+    for rect, height in zip(rects, height):
+        height_ann = rect.get_height()
+        ax2.text(
+            rect.get_x() + rect.get_width() / 2, height_ann, height, ha="center", va="bottom"
+        )
+    plt.savefig("images/duration.png")
+    plt.show()
+
+
+
