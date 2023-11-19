@@ -33,8 +33,8 @@ def preprocessing_data(text):
     :param text:  text that should be preprocessed
     :return: Preprocessed string
     """
-    preprocess_data = re.sub(r'http\S+', ' ', str(text)) #delete http/https
-    preprocess_data = re.sub(r'(^| )\S+\.com( |$)', ' ', preprocess_data) #delete link.com
+    preprocess_data = re.sub(r'http\S+', ' ', str(text), flags=re.IGNORECASE) #delete http/https
+    preprocess_data = re.sub(r'(^| )\S+\.com( |$)', ' ', preprocess_data, flags=re.IGNORECASE) #delete link.com
     preprocess_data = re.sub(r'<\S+\W?/?>', ' ', preprocess_data) #delete html marks e.g <br><br/>
     preprocess_data = re.sub(r'(@\w+|\d+)', ' ', preprocess_data, flags=re.IGNORECASE) #delete user names
     preprocess_data = re.sub(r'[^a-z\s]+', ' ', preprocess_data, flags=re.IGNORECASE) #leave only letters and spaces
