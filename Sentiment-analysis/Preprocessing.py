@@ -38,10 +38,8 @@ def preprocessing_data(text):
     preprocess_data = re.sub(r'<\S+\W?/?>', ' ', preprocess_data) #delete html marks e.g <br><br/>
     preprocess_data = re.sub(r'(@\w+|\d+)', ' ', preprocess_data, flags=re.IGNORECASE) #delete user names
     preprocess_data = re.sub(r'[^a-z\s]+', ' ', preprocess_data, flags=re.IGNORECASE) #leave only letters and spaces
-    preprocess_data = re.sub(r'(\s+)', ' ', preprocess_data) #delete unnecesary spaces
     preprocess_data = preprocess_data.lower()
     preprocess_data = lemmatisation(preprocess_data)
-    preprocess_data = re.sub(r'[^a-z\s]+', ' ', preprocess_data, flags=re.IGNORECASE) #leave only letters and spaces
     preprocess_data = re.sub(r'(^| ).( |$)', '', preprocess_data) #delete individual letters
     preprocess_data = re.sub(r'(\s+)', ' ', preprocess_data) #delete unnecesary spaces
 
