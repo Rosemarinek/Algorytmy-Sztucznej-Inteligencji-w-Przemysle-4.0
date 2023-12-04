@@ -22,7 +22,6 @@ class NaiveBayesFromSklearn:
     def train(self):
         X_train_counts = self.create_bow_for_train_data(self.train_data)
         self.nb.fit(X_train_counts, self.train_labels)
-        print("---Training Naive Bayes from Sklearn completed---\n")
 
     def test(self):
         X_test_counts = self.count_vect.transform(self.test_data)

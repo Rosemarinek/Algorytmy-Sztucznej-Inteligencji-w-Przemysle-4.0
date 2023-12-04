@@ -5,22 +5,39 @@ from sklearn import model_selection
 from NaiveBayesFromSklearn import *
 import dill as pickle
 import time
+from NaiveBayes import *
 
 
 
 def train_nb_from_sklearn(train_data, train_labels, test_data, test_labels):
     nbS = NaiveBayesFromSklearn(train_data, train_labels, test_data, test_labels)
-    print("----Training with an algorithm from Sklearn in progress---")
+    print("----Training with an algorithm from Sklearn in progress----")
     st = time.time()
     nbS.train()
     et = time.time()
     nbS.training_duration = et - st
     print("Training NBSklearn duration: ", nbS.training_duration)
-    print('---Training Completed---\n')
+    print('----Training Completed----\n')
 
     fS = open('nbSklearn_classifier.pickle', 'wb')
     pickle.dump(nbS, fS)
     fS.close()
+
+def train_nb(train_data, train_labels, classes):
+    nb = NaiveBayes(classes)
+    print("----Training with an implemented algorithm in progress---")
+    st = time.time()
+    nb.train(train_data, train_labels)
+    et = time.time()
+    nb.training_duration = et - st
+    print("Training NB duration: ", nb.training_duration)
+    print('---Training Completed---\n')
+
+    f = open('nb_classifier.pickle', 'wb')
+    pickle.dump(nb, f)
+    f.close()
+
+
 
 
 if __name__ == '__main__':
@@ -129,9 +146,11 @@ if __name__ == '__main__':
     # # --------------------------------------------------------------------#
     #
     # # -----------------------------TRAINING------------------------------#
-
     # Training NB from Sklearn
     train_nb_from_sklearn(train_data, train_labels, test_data, test_labels)
+
+    # Training NB own algorithm
+    train_nb(train_data, train_labels, classes)
 
     # # --------------------------------------------------------------------#
     #
@@ -140,19 +159,24 @@ if __name__ == '__main__':
     nbS = pickle.load(fS)
     fS.close()
 
+    f = open('nb_classifier.pickle', 'rb')
+    nb = pickle.load(f)
+    f.close()
+
     # # --------------------------------------------------------------------#
     #
     # # ----------------CALCULATING AND PLOT ACCURRACY -----------------------#
     print("----------------Calculating accurracy-----------------------")
     nbS_accuracy = nbS.calculating_accuracy()
+    nb_accuracy= nb.calculating_accuracy(test_data, test_labels)
 
     plt.figure(5)
     fig2, ax2 = plt.subplots()
     plt.grid(color='#CCCCCC', linestyle=':', linewidth=1)
-    height = [nbS_accuracy * 100]
+    height = [nb_accuracy * 100, nbS_accuracy * 100]
     y_pos = np.arange(len(height))
-    bars = ["Algorytm z biblioteki Sklearn"]
-    plt.bar(y_pos, height, color=['cornflowerblue'])
+    bars = ["Stworzony algorytm", "Algorytm z biblioteki Sklearn"]
+    plt.bar(y_pos, height, color=['forestgreen', 'cornflowerblue'])
     plt.xticks(y_pos, bars)
     plt.yticks(np.arange(0, 110, 10))
     plt.xlabel("Rodzaj algorytmu", fontsize=10)
@@ -173,10 +197,10 @@ if __name__ == '__main__':
     plt.figure(6)
     fig2, ax2 = plt.subplots()
     plt.grid(color='#CCCCCC', linestyle=':', linewidth=1)
-    height = [nbS.training_duration]
+    height = [nb.training_duration, nbS.training_duration]
     y_pos = np.arange(len(height))
-    bars = ["Algorytm z biblioteki \n Sklearn"]
-    plt.bar(y_pos, height, color=['dodgerblue'])
+    bars = ["Stworzony algorytm", "Algorytm z biblioteki \n Sklearn"]
+    plt.bar(y_pos, height, color=['lawngreen', 'dodgerblue'])
     plt.xticks(y_pos, bars)
     plt.xlabel("Rodzaj algorytmu", fontsize=10)
     plt.ylabel("Czas [s]", fontsize=10)
