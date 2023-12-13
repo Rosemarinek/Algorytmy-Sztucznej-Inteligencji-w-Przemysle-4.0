@@ -6,6 +6,8 @@ from NaiveBayesFromSklearn import *
 import dill as pickle
 import time
 from NaiveBayes import *
+from keras.models import load_model
+from NeuralNetworks import *
 
 
 
@@ -37,6 +39,19 @@ def train_nb(train_data, train_labels, classes):
     pickle.dump(nb, f)
     f.close()
 
+def train_bilstm(train_data, train_labels, test_data, test_labels):
+    bilstm = BiLSTM(train_data, train_labels, test_data, test_labels)
+    print("----Training BiLSTM in progress---")
+    st = time.time()
+    bilstm.train()
+    et = time.time()
+    bilstm.training_duration = et - st
+    print("Training NB duration: ", bilstm.training_duration)
+    print('---Training Completed---\n')
+
+    f = open('bilstm.pickle', 'wb')
+    pickle.dump(bilstm, f)
+    f.close()
 
 
 
@@ -49,9 +64,9 @@ if __name__ == '__main__':
     x_train = training_set[0].values[1:]  # content, delete headers
     y_train = training_set[1].values[1:]  # sentiment, delete headers
 
-    # # -------------------------------------------------------------------#
-    #
-    # # ------------Plot The total number of examples in dataset----------#
+    # -------------------------------------------------------------------#
+
+    # ------------Plot The total number of examples in dataset----------#
 
     plt.figure(1)
     fig1, ax1 = plt.subplots()
@@ -65,11 +80,11 @@ if __name__ == '__main__':
     plt.savefig("images/1.png")
     plt.show()
 
-    # # -------------------------------------------------------------------#
-    #
-    # # ------------------------Preprocessing data-------------------------#
+    # -------------------------------------------------------------------#
 
-    # print("----------------------- Preprocessing data -----------------------")
+    # ------------------------Preprocessing data-------------------------#
+
+    print("----------------------- Preprocessing data -----------------------")
     x_train_after_preprocessing = []
     y_train_after_preprocessing = []
     for index in range(len(x_train)):
@@ -81,17 +96,17 @@ if __name__ == '__main__':
     pd.DataFrame(x_train_after_preprocessing).to_csv("x_train.csv", header=None, sep=";")
     pd.DataFrame(y_train_after_preprocessing).to_csv("y_train.csv", header=None, sep=";")
 
-    # # -------------------------------------------------------------------#
-    #
-    # # -------------Upload data after preprocessing data------------------#
-    #
+    # -------------------------------------------------------------------#
+
+    # -------------Upload data after preprocessing data------------------#
+
     print("------------------- Upload data after preprocessing data --------------------")
     x_train_after_preprocessing = pd.read_csv('x_train.csv', header=None, sep=";")[1].values
     y_train_after_preprocessing = pd.read_csv('y_train.csv', header=None, sep=";")[1].values
 
-    # # -------------------------------------------------------------------#
-    #
-    # # ------Plot The total number of examples after preprocessing--------#
+    # -------------------------------------------------------------------#
+
+    # ------Plot The total number of examples after preprocessing--------#
 
     plt.figure(2)
     fig3, ax3 = plt.subplots()
@@ -105,9 +120,9 @@ if __name__ == '__main__':
     plt.savefig("images/2.png")
     plt.show()
 
-    # # -------------------------------------------------------------------#
-    #
-    # # ---------------------------Split data------------------------------#
+    # -------------------------------------------------------------------#
+
+    # ---------------------------Split data------------------------------#
     train_data, test_data, train_labels, test_labels = model_selection.train_test_split(x_train_after_preprocessing,
                                                                                         y_train_after_preprocessing,
                                                                                         shuffle=True,
@@ -116,9 +131,9 @@ if __name__ == '__main__':
                                                                                         stratify=y_train_after_preprocessing)
     classes = np.unique(train_labels)
 
-    # # -------------------------------------------------------------------#
-    #
-    # # ------Plot The total number of training and test examples----------#
+    # -------------------------------------------------------------------#
+
+    # ------Plot The total number of training and test examples----------#
 
     plt.figure(3)
     fig24, ax4 = plt.subplots()
@@ -143,18 +158,22 @@ if __name__ == '__main__':
     plt.savefig("images/3.png")
     plt.show()
 
-    # # --------------------------------------------------------------------#
-    #
-    # # -----------------------------TRAINING------------------------------#
+    # --------------------------------------------------------------------#
+
+    # -----------------------------TRAINING------------------------------#
     # Training NB from Sklearn
     train_nb_from_sklearn(train_data, train_labels, test_data, test_labels)
 
     # Training NB own algorithm
     train_nb(train_data, train_labels, classes)
 
-    # # --------------------------------------------------------------------#
-    #
-    # # ---------------------------OPEN MODELS------------------------------#
+
+    # Training BiLSTM
+    train_bilstm(train_data, train_labels, test_data, test_labels)
+
+    # --------------------------------------------------------------------#
+
+    # ---------------------------OPEN MODELS------------------------------#
     fS = open('nbSklearn_classifier.pickle', 'rb')
     nbS = pickle.load(fS)
     fS.close()
@@ -163,20 +182,28 @@ if __name__ == '__main__':
     nb = pickle.load(f)
     f.close()
 
-    # # --------------------------------------------------------------------#
-    #
-    # # ----------------CALCULATING AND PLOT ACCURRACY -----------------------#
+
+    bilstm_model = load_model('bilstm.h5')
+    f = open('bilstm.pickle', 'rb')
+    bilstm = pickle.load(f)
+    f.close()
+
+    print(bilstm.accuracy)
+
+    # --------------------------------------------------------------------#
+
+    # ----------------CALCULATING AND PLOT ACCURRACY -----------------------#
     print("----------------Calculating accurracy-----------------------")
-    nbS_accuracy = nbS.calculating_accuracy()
-    nb_accuracy= nb.calculating_accuracy(test_data, test_labels)
+    nbS_accuracy = nbS.calculate_accuracy()
+    nb_accuracy = nb.calculate_accuracy(test_data, test_labels)
 
     plt.figure(5)
     fig2, ax2 = plt.subplots()
     plt.grid(color='#CCCCCC', linestyle=':', linewidth=1)
-    height = [nb_accuracy * 100, nbS_accuracy * 100]
+    height = [nb_accuracy * 100, nbS_accuracy * 100, bilstm.accuracy * 100]
     y_pos = np.arange(len(height))
-    bars = ["Stworzony algorytm", "Algorytm z biblioteki Sklearn"]
-    plt.bar(y_pos, height, color=['forestgreen', 'cornflowerblue'])
+    bars = ["Stworzony algorytm", "Algorytm z biblioteki Sklearn", "BiLSTM"]
+    plt.bar(y_pos, height, color=['forestgreen', 'cornflowerblue', 'orange'])
     plt.xticks(y_pos, bars)
     plt.yticks(np.arange(0, 110, 10))
     plt.xlabel("Rodzaj algorytmu", fontsize=10)
@@ -190,17 +217,17 @@ if __name__ == '__main__':
     plt.savefig("images/accuracy.png")
     plt.show()
 
-    # # --------------------------------------------------------------------#
-    #
-    # # ---------------------PLOT TRAINING DURATION-------------------------#
+    # --------------------------------------------------------------------#
+
+    # ---------------------PLOT TRAINING DURATION-------------------------#
 
     plt.figure(6)
     fig2, ax2 = plt.subplots()
     plt.grid(color='#CCCCCC', linestyle=':', linewidth=1)
-    height = [nb.training_duration, nbS.training_duration]
+    height = [nb.training_duration, nbS.training_duration, bilstm.training_duration]
     y_pos = np.arange(len(height))
-    bars = ["Stworzony algorytm", "Algorytm z biblioteki \n Sklearn"]
-    plt.bar(y_pos, height, color=['lawngreen', 'dodgerblue'])
+    bars = ["Stworzony algorytm", "Algorytm z biblioteki \n Sklearn", "BiLSTM"]
+    plt.bar(y_pos, height, color=['lawngreen', 'dodgerblue', 'orange'])
     plt.xticks(y_pos, bars)
     plt.xlabel("Rodzaj algorytmu", fontsize=10)
     plt.ylabel("Czas [s]", fontsize=10)

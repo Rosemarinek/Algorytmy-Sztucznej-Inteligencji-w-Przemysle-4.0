@@ -27,7 +27,7 @@ class NaiveBayesFromSklearn:
         X_test_counts = self.count_vect.transform(self.test_data)
         return X_test_counts
 
-    def calculating_accuracy(self):
+    def calculate_accuracy(self):
         X_test_counts = self.test()
         predicted = self.nb.predict(X_test_counts)
         test_accuracy = np.sum(predicted == self.test_labels) / float(len(predicted))

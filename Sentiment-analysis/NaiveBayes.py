@@ -121,7 +121,7 @@ class NaiveBayes:
 
         return np.array(predictions)
 
-    def calculating_accuracy(self, test_data, test_labels):
+    def calculate_accuracy(self, test_data, test_labels):
         prediction_classes = self.test(test_data)
         test_accuracy = np.sum(prediction_classes == test_labels) / float(len(test_labels))
         return test_accuracy
